@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Informasi Kas RT/RW</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Hamburger Menu Button (Mobile Only) -->
+        <button id="hamburgerBtn" class="hamburger-btn">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- Overlay for Mobile Menu -->
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-wallet fa-2x logo-icon"></i>
+                <h2>Gang E20/E21</h2>
+                <button id="closeMenuBtn" class="close-menu-btn" style="display: none;">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-target="dashboard"><i class="fa-solid fa-chart-pie"></i> <span class="nav-text">Dashboard</span></li>
+                <li id="navInput" data-target="input" style="display: none;"><i class="fa-solid fa-plus-circle"></i> <span class="nav-text">Input Transaksi</span></li>
+                <li data-target="iuran"><i class="fa-solid fa-receipt"></i> <span class="nav-text">Kas Gang</span></li>
+                <li data-target="bayar-kas"><i class="fa-solid fa-wallet"></i> <span class="nav-text">Bayar Kas</span></li>
+                <li data-target="history"><i class="fa-solid fa-clock-rotate-left"></i> <span class="nav-text">Riwayat</span></li>
+                <li data-target="inventaris"><i class="fa-solid fa-boxes-stacked"></i> <span class="nav-text">Inventaris</span></li>
+                <li data-target="program"><i class="fa-solid fa-clipboard-list"></i> <span class="nav-text">Program Kerja</span></li>
+             <li data-target="struktur"><i class="fa-solid fa-sitemap"></i> <span class="nav-text">Struktur Organisasi</span></li>
+                <div class="auth-section">
+                    <button id="btnAuthToggle" class="btn-submit" style="background-color: var(--text-muted);"><i class="fa-solid fa-right-to-bracket"></i> <span class="nav-text">Login Admin</span></button>
+                </div>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1>Selamat Datang, Warga E20/E21</h1>
+                <div class="date-display" id="currentDate"></div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="page-section active">
+                <div class="filter-container">
+                    <div class="filter-group">
+                        <label for="filterYear"><i class="fa-regular fa-calendar"></i> Tahun</label>
+                        <select id="filterYear">
+                            <option value="">Semua Tahun</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterMonth"><i class="fa-regular fa-calendar-days"></i> Bulan</label>
+                        <select id="filterMonth">
+                            <option value="">Semua Bulan</option>
+                            <option value="01">Januari</option>
+                            <option value="02">Februari</option>
+                            <option value="03">Maret</option>
+                            <option value="04">April</option>
+                            <option value="05">Mei</option>
+                            <option value="06">Juni</option>
+                            <option value="07">Juli</option>
+                            <option value="08">Agustus</option>
+                            <option value="09">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterType"><i class="fa-solid fa-filter"></i> Jenis Transaksi</label>
+                        <select id="filterType">
+                            <option value="Semua">Semua Transaksi</option>
+                            <option value="Pemasukan">Pemasukan</option>
+                            <option value="Pengeluaran">Pengeluaran</option>
+                        </select>
+                    </div>
+                    <button class="btn-text" id="btnResetFilter" style="margin-top: 24px;"><i class="fa-solid fa-rotate-left"></i> Reset Filter</button>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card balance-card">
+                        <div class="card-icon"><i class="fa-solid fa-building-columns"></i></div>
+                        <div class="card-info">
+                            <h3>Total Saldo</h3>
+                            <h2 id="totalBalance">Rp 0</h2>
+                        </div>
+                    </div>
+                    <div class="card income-card">
+                        <div class="card-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                        <div class="card-info">
+                            <h3>Pemasukan</h3>
+                            <h2 id="totalIncome">Rp 0</h2>
+                        </div>
+                    </div>
+                    <div class="card expense-card">
+                        <div class="card-icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                        <div class="card-info">
+                            <h3>Pengeluaran</h3>
+                            <h2 id="totalExpense">Rp 0</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-transactions-preview">
+                    <div class="section-header">
+                        <h3>Data Transaksi</h3>
+                        <button class="btn-refresh" id="btnExportPDF"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+                    </div>
+                    <div class="table-container">
+                        <table id="recentTable">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Keterangan</th>
+                                    <th>Jenis</th>
+                                    <th>Nominal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentTableBody">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                        <div id="loadingIndicator" class="loading-spinner" style="display: none;">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> Memuat data...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Input Transaction Section -->
+            <section id="input" class="page-section">
+                <div class="form-container">
+                    <h2>Catat Transaksi Baru</h2>
+                    <form id="transactionForm">
+                        <div class="form-group">
+                            <label for="tanggal">Tanggal Transaksi</label>
+                            <input type="date" id="tanggal" name="tanggal" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="jenis">Jenis Transaksi</label>
+                            <div class="radio-group">
+                                <input type="radio" id="pemasukan" name="jenis" value="Pemasukan" checked>
+                                <label for="pemasukan" class="radio-label income"><i class="fa-solid fa-arrow-down"></i> Pemasukan</label>
+                                
+                                <input type="radio" id="pengeluaran" name="jenis" value="Pengeluaran">
+                                <label for="pengeluaran" class="radio-label expense"><i class="fa-solid fa-arrow-up"></i> Pengeluaran</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="nominal">Nominal (Rp)</label>
+                            <input type="number" id="nominal" name="nominal" min="0" placeholder="Contoh: 50000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="keterangan">Keterangan / Rincian</label>
+                            <input type="text" id="keterangan" name="keterangan" placeholder="Contoh: Iuran Bulanan Pak Budi" required>
+                        </div>
+                        <button type="submit" class="btn-submit" id="submitBtn">
+                            <span class="btn-text-content">Simpan Transaksi</span>
+                            <i class="fa-solid fa-spinner fa-spin btn-loading" style="display: none;"></i>
+                        </button>
+                    </form>
+                    <div id="formMessage" class="message-box" style="display: none;"></div>
+                </div>
+            </section>
+
+            <!-- Iuran Warga Section -->
+            <section id="iuran" class="page-section">
+                <div class="iuran-container">
+                    <div class="iuran-header">
+                        <h2 id="iuranTitle">Checklist Iuran Bulanan Warga - Tahun 2026</h2>
+                        <button id="btnExportIuranPDF" class="btn-refresh">
+                            <i class="fa-solid fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
+                    
+                    <div class="iuran-search-container">
+                        <div class="search-group">
+                            <label for="iuranSearchInput"><i class="fa-solid fa-search"></i> Cari Nama atau No Rumah</label>
+                            <input type="text" id="iuranSearchInput" placeholder="Ketik nama atau nomor rumah...">
+                        </div>
+                        <button class="btn-text" id="btnResetIuranSearch"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                    </div>
+                    
+                    <div class="iuran-table-container">
+                        <table id="iuranTable" class="iuran-table">
+                            <thead>
+                                <tr id="iuranTableHeader">
+                                    <th>No</th>
+                                    <th>Nomor Rumah / Nama</th>
+                                    <th>Jan</th>
+                                    <th>Feb</th>
+                                    <th>Mar</th>
+                                    <th>Apr</th>
+                                    <th>Mei</th>
+                                    <th>Juni</th>
+                                    <th>Juli</th>
+                                    <th>Agu</th>
+                                    <th>Sep</th>
+                                    <th>Okt</th>
+                                    <th>Nov</th>
+                                    <th>Des</th>
+                                </tr>
+                            </thead>
+                            <tbody id="iuranTableBody">
+                                <tr><td colspan="14" style="text-align:center; color:var(--text-muted);">Memuat data iuran warga...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bayar Kas Section -->
+            <section id="bayar-kas" class="page-section">
+                <div class="bayar-kas-container">
+                    <div class="section-header">
+                        <h2>Bayar Kas Gang</h2>
+                    </div>
+                    
+                    <div class="bayar-kas-content">
+                        <!-- QRIS Section -->
+                        <div class="bayar-kas-qris">
+                            <div class="bayar-kas-warning">
+                                <i class="fa-solid fa-circle-info"></i>
+                                <strong>Penting:</strong> Pastikan Anda telah melakukan pembayaran sebelum mengisi form konfirmasi di bawah.
+                            </div>
+                            <div class="bayar-kas-qris-wrapper">
+                                <img src="qris.png" alt="QRIS Payment Code" class="bayar-kas-qris-image">
+                            </div>
+                        </div>
+                        
+                        <!-- Form Section -->
+                        <div class="bayar-kas-form">
+                            <h3>Konfirmasi Pembayaran Kas</h3>
+                            
+                            <form id="paymentConfirmForm">
+                                <div class="form-group">
+                                    <label for="paymentName">Nama Lengkap <span>*</span></label>
+                                    <input type="text" id="paymentName" name="nama" placeholder="Masukkan nama lengkap" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="paymentHouse">No. Rumah <span>*</span></label>
+                                    <input type="text" id="paymentHouse" name="no_rumah" placeholder="Contoh: E20/01" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="paymentDesc">Keterangan <span>*</span></label>
+                                    <textarea id="paymentDesc" name="keterangan" placeholder="Contoh: Pembayaran Kas Gang Bulan Mei 2026" rows="3" required></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="paymentProof">Upload Bukti Bayar <span>*</span></label>
+                                    <input type="file" id="paymentProof" name="bukti_bayar" accept="image/*,.pdf" required>
+                                    <small>Format: Foto atau PDF (max 5MB)</small>
+                                </div>
+
+                                <button type="submit" class="btn-submit">
+                                    <i class="fa-solid fa-paper-plane"></i> Kirim Konfirmasi ke WhatsApp
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- History Section -->
+            <section id="history" class="page-section">
+                <div class="history-container">
+                    <div class="section-header">
+                        <h2>Riwayat Seluruh Transaksi</h2>
+                        <button class="btn-refresh" onclick="fetchData()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                    </div>
+                    <div class="table-container full-height">
+                        <table id="historyTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Tanggal</th>
+                                    <th>Keterangan</th>
+                                    <th>Jenis</th>
+                                    <th>Nominal</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Inventaris Section -->
+            <section id="inventaris" class="page-section">
+                <div class="inventaris-container">
+                    <div class="section-header">
+                        <h2>Data Inventaris Gang E20/E21</h2>
+                        <button id="btnExportInventarisPDF" class="btn-refresh">
+                            <i class="fa-solid fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table id="inventarisTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Barang</th>
+                                    <th>Kategori</th>
+                                    <th>Jumlah</th>
+                                    <th>Kondisi</th>
+                                    <th>Lokasi</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventarisTableBody">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Program Kerja Section -->
+            <section id="program" class="page-section">
+                <div class="program-container">
+                    <div class="section-header">
+                        <h2>Program Kerja Gang E20/E21 Tahun 2026</h2>
+                        <button id="btnExportProgramPDF" class="btn-refresh">
+                            <i class="fa-solid fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table id="programTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Program Kerja</th>
+                                    <th>PIC</th>
+                                    <th>Target Waktu</th>
+                                    <th>Status</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="programTableBody">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Struktur Organisasi Section -->
+            <section id="struktur" class="page-section">
+                <div class="struktur-container">
+                    <div class="section-header" style="text-align: center; justify-content: center; margin-bottom: 32px;">
+                        <h2>Struktur Organisasi Kepengurusan</h2>
+                    </div>
+                    
+                    <div class="org-tree">
+                        <!-- Level 1: Ketua -->
+                        <div class="org-level">
+                            <div class="org-card leader">
+                                <div class="org-avatar"><i class="fa-solid fa-user-tie"></i></div>
+                                <h4>Nama Ketua RT</h4>
+                                <p>Ketua RT</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Level 2: Sekretaris & Bendahara -->
+                        <div class="org-level">
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-user-pen"></i></div>
+                                <h4>Nama Sekretaris</h4>
+                                <p>Sekretaris</p>
+                            </div>
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-calculator"></i></div>
+                                <h4>Nama Bendahara</h4>
+                                <p>Bendahara</p>
+                            </div>
+                        </div>
+
+                        <!-- Level 3: Seksi-seksi -->
+                        <div class="org-level members">
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-shield-halved"></i></div>
+                                <h4>Nama Seksi</h4>
+                                <p>Seksi Keamanan</p>
+                            </div>
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-broom"></i></div>
+                                <h4>Nama Seksi</h4>
+                                <p>Seksi Kebersihan</p>
+                            </div>
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                                <h4>Nama Seksi</h4>
+                                <p>Seksi Sosial</p>
+                            </div>
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-lightbulb"></i></div>
+                                <h4>Nama Seksi</h4>
+                                <p>Seksi Pembangunan</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">Data berhasil disimpan!</div>
+
+    <!-- PDF Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; display: flex; flex-direction: column;">
+            <span class="close-modal" onclick="closePDFPreview()">&times;</span>
+            <div style="flex: 1; overflow-y: auto; padding: 30px; background-color: white; border-radius: 12px;">
+                <div id="previewContent"></div>
+            </div>
+            <div style="padding: 20px; border-top: 1px solid var(--border-color); display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn-text" onclick="closePDFPreview()" style="padding: 10px 20px; border: 1px solid var(--border-color); border-radius: 6px;">Batal</button>
+                <button class="btn-submit" onclick="downloadPDFNow()" style="padding: 10px 20px;">Download PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content form-container">
+            <span class="close-modal">&times;</span>
+            <h2>Login Pengurus</h2>
+            <p style="margin-bottom: 24px; color: var(--text-muted); font-size: 14px;">Silakan login untuk mengakses menu Input Transaksi.</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn-submit" id="btnLoginSubmit">
+                    <span class="btn-login-text">Login</span>
+                    <i class="fa-solid fa-spinner fa-spin btn-login-loading" style="display: none;"></i>
+                </button>
+            </form>
+            <div id="loginMessage" class="message-box" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
