@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Informasi E20/E21</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Hamburger Menu Button (Mobile Only) -->
+        <button id="hamburgerBtn" class="hamburger-btn">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- Floating Login Button (Mobile Only) -->
+        <button id="fabLoginBtn" class="fab-login" title="Login Admin">
+            <i class="fa-solid fa-right-to-bracket"></i>
+        </button>
+
+        <!-- Overlay for Mobile Menu -->
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-wallet fa-2x logo-icon"></i>
+                <h2><marquee direction="left"> Sistem Informasi Gang E20/E21 </marquee></h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-target="dashboard"><i class="fa-solid fa-chart-pie"></i> <span class="nav-text">Dashboard</span></li>
+                <li id="navInput" data-target="input"><i class="fa-solid fa-plus-circle"></i> <span class="nav-text">Input Transaksi</span></li>
+                <li id="navWarga" data-target="warga"><i class="fa-solid fa-users"></i> <span class="nav-text">Data Warga</span></li>
+                <li data-target="iuran"><i class="fa-solid fa-receipt"></i> <span class="nav-text">Cheklist Kas Bulanan</span></li>
+                <li data-target="bayar-kas"><i class="fa-solid fa-wallet"></i> <span class="nav-text">Bayar Kas</span></li>
+                <li data-target="galeri"><i class="fa-solid fa-images"></i> <span class="nav-text">Galeri</span></li>
+                <li data-target="inventaris"><i class="fa-solid fa-boxes-stacked"></i> <span class="nav-text">Inventaris</span></li>
+                <li data-target="program"><i class="fa-solid fa-clipboard-list"></i> <span class="nav-text">Program Kerja</span></li>
+                <li data-target="struktur"><i class="fa-solid fa-sitemap"></i> <span class="nav-text">Struktur Kepengurusan</span></li>
+                <li data-target="saran"><i class="fa-solid fa-comments"></i> <span class="nav-text">Kritik & Saran</span></li>
+                <div class="auth-section">
+                    <button id="btnAuthToggle" class="btn-submit" style="background-color: var(--text-muted);"><i class="fa-solid fa-right-to-bracket"></i> <span class="nav-text">Login Admin</span></button>
+                </div>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1>Selamat Datang, Warga E20/E21</h1>
+                <div class="date-display" id="currentDate"></div>
+               <!-- <div class="page-section active" id="idc15a3c12d2bb8" a='{"t":"g7bs","v":"1.2","lang":"id","locs":[445],"ssot":"c","sics":"ds","cbkg":"rgba(255,255,255,0)","cfnt":"rgb(0,0,0)","cend":"rgba(0,0,0,0)","sfnt":"a","slis":40}'>Sumber Data Cuaca: <a href="https://cuacalab.id/cuaca_bekasi/2_minggu/">https://cuacalab.id/cuaca_bekasi/2_minggu/</a></div><script async src="https://static1.cuacalab.id/widgetjs/?id=idc15a3c12d2bb8"></script> -->
+                
+            </header>
+
+            <!-- Dashboard Section -->
+           
+            <section id="dashboard" class="page-section active">    
+                <div class="filter-container">
+                    <div class="filter-group">
+                        <label for="filterYear"><i class="fa-regular fa-calendar"></i> Tahun</label>
+                        <select id="filterYear">
+                            <option value="">Semua Tahun</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterMonth"><i class="fa-regular fa-calendar-days"></i> Bulan</label>
+                        <select id="filterMonth">
+                            <option value="">Semua Bulan</option>
+                            <option value="01">Januari</option>
+                            <option value="02">Februari</option>
+                            <option value="03">Maret</option>
+                            <option value="04">April</option>
+                            <option value="05">Mei</option>
+                            <option value="06">Juni</option>
+                            <option value="07">Juli</option>
+                            <option value="08">Agustus</option>
+                            <option value="09">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterType"><i class="fa-solid fa-filter"></i> Jenis Transaksi</label>
+                        <select id="filterType">
+                            <option value="Semua">Semua Transaksi</option>
+                            <option value="Pemasukan">Pemasukan</option>
+                            <option value="Pengeluaran">Pengeluaran</option>
+                        </select>
+                    </div>
+                    <button class="btn-text" id="btnResetFilter" style="margin-top: 24px;"><i class="fa-solid fa-rotate-left"></i> Reset Filter</button>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card balance-card">
+                        <div class="card-icon"><i class="fa-solid fa-building-columns"></i></div>
+                        <div class="card-info">
+                            <h3>Total Saldo</h3>
+                            <h2 id="totalBalance">Rp 0</h2>
+                        </div>
+                    </div>
+                    <div class="card income-card">
+                        <div class="card-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                        <div class="card-info">
+                            <h3>Pemasukan</h3>
+                            <h2 id="totalIncome">Rp 0</h2>
+                        </div>
+                    </div>
+                    <div class="card expense-card">
+                        <div class="card-icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                        <div class="card-info">
+                            <h3>Pengeluaran</h3>
+                            <h2 id="totalExpense">Rp 0</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-transactions-preview">
+                    <div class="section-header">
+                        <h3>Data Transaksi</h3>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button id="btnExportPDF" class="btn-submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px; font-size: 14px; margin-top: 0; background-color: var(--primary-color); width: auto; height: 38px;"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+                            <button id="btnExportExcel" class="btn-submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px; font-size: 14px; margin-top: 0; background-color: var(--primary-color); width: auto; height: 38px;"><i class="fa-solid fa-file-export"></i> Export Excel</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table id="recentTable">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Keterangan</th>
+                                    <th>Jenis</th>
+                                    <th>Nominal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentTableBody">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                        <div id="loadingIndicator" class="loading-spinner" style="display: none;">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> Memuat data...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Input Transaction Section -->
+            <section id="input" class="page-section">
+                <div class="form-container">
+                    <h2>Catat Transaksi Baru</h2>
+                    <form id="transactionForm">
+                        <div class="form-group">
+                            <label for="tanggal">Tanggal Transaksi</label>
+                            <input type="date" id="tanggal" name="tanggal" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="jenis">Jenis Transaksi</label>
+                            <div class="radio-group">
+                                <input type="radio" id="pemasukan" name="jenis" value="Pemasukan" checked>
+                                <label for="pemasukan" class="radio-label income"><i class="fa-solid fa-arrow-down"></i> Pemasukan</label>
+                                
+                                <input type="radio" id="pengeluaran" name="jenis" value="Pengeluaran">
+                                <label for="pengeluaran" class="radio-label expense"><i class="fa-solid fa-arrow-up"></i> Pengeluaran</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="nominal">Nominal (Rp)</label>
+                            <input type="number" id="nominal" name="nominal" min="0" placeholder="Contoh: 50000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="keterangan">Keterangan / Rincian</label>
+                            <input type="text" id="keterangan" name="keterangan" placeholder="Contoh: Iuran Bulanan Pak Budi" required>
+                        </div>
+                        <button type="submit" class="btn-submit" id="submitBtn">
+                            <span class="btn-text-content">Simpan Transaksi</span>
+                            <i class="fa-solid fa-spinner fa-spin btn-loading" style="display: none;"></i>
+                        </button>
+                    </form>
+                    <div id="formMessage" class="message-box" style="display: none;"></div>
+                </div>
+            </section>
+
+            <!-- Data Warga Section -->
+            <section id="warga" class="page-section">
+                <div class="warga-container">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-users" style="color:var(--primary-color);"></i> Data Warga Gang E20/E21</h2>
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <button id="btnTambahWargaData" class="btn-submit" style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;font-size:14px;margin-top:0;width:auto;height:38px;">
+                                <i class="fa-solid fa-user-plus"></i> Tambah Warga
+                            </button>
+                            <button id="btnExportWargaPDF" class="btn-submit" style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;font-size:14px;margin-top:0;background-color:var(--primary-color);width:auto;height:38px;">
+                                <i class="fa-solid fa-file-pdf"></i> Export PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="iuran-search-container" style="margin-bottom:12px;">
+                        <div class="search-group">
+                            <label for="wargaSearchInput"><i class="fa-solid fa-search"></i>  Cari</label>
+                            <input type="text" id="wargaSearchInput" placeholder="Ketik nama atau nomor rumah...">
+                        </div>
+                        <button class="btn-text" id="btnResetWargaSearch"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="wargaTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>No Rumah</th>
+                                    <th>Nama</th>
+                                    <th>No Telp/WA</th>
+                                    <th>Jml Anggota</th>
+                                    <th>File KK</th>
+                                    <th class="admin-only">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wargaTableBody">
+                                <tr><td colspan="7" style="text-align:center;color:var(--text-muted);">Memuat data warga...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Iuran Warga Section -->
+            <section id="iuran" class="page-section">
+                <div class="iuran-container">
+                    <div class="iuran-header">
+                        <h2 id="iuranTitle">Checklist Iuran Bulanan Warga | HUT RI, THR Security dan  Iuran Ronda (Tahunan) - Tahun 2026</h2>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button id="btnTambahWarga" class="btn-submit admin-only" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px; font-size: 14px; margin-top: 0; background-color: var(--primary-color); width: auto; height: 38px;"><i class="fa-solid fa-plus-circle"></i> Tambah Warga</button>
+                            <button id="btnExportIuranPDF" class="btn-submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px; font-size: 14px; margin-top: 0; background-color: var(--primary-color); width: auto; height: 38px;">
+                                <i class="fa-solid fa-file-pdf"></i> Export PDF
+                            </button>
+                            <button id="btnExportIuranExcel" class="btn-submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px; font-size: 14px; margin-top: 0; background-color: var(--primary-color); width: auto; height: 38px;">
+                                <i class="fa-solid fa-file-export"></i> Export Excel
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="iuran-search-container">
+                        <div class="search-group">
+                            <label for="iuranSearchInput"><i class="fa-solid fa-search"></i>  Cari</label>
+                            <input type="text" id="iuranSearchInput" placeholder="Ketik nama atau nomor rumah...">
+                        </div>
+                        <button class="btn-text" id="btnResetIuranSearch"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                    </div>
+                    
+                    <div class="iuran-table-container">
+                        <table id="iuranTable" class="iuran-table">
+                            <thead>
+                                <tr id="iuranTableHeader">
+                                    <th>No</th>
+                                    <th>Nomor Rumah / Nama</th>
+                                    <th>Jan</th>
+                                    <th>Feb</th>
+                                    <th>Mar</th>
+                                    <th>Apr</th>
+                                    <th>Mei</th>
+                                    <th>Juni</th>
+                                    <th>Juli</th>
+                                    <th>Agu</th>
+                                    <th>Sep</th>
+                                    <th>Okt</th>
+                                    <th>Nov</th>
+                                <th>Des</th>
+                                <th>HUT RI</th>
+                               <th>THR Security</th>
+                                <th>Iuran Ronda</th> 
+                                <th class="admin-only">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="iuranTableBody">
+                                <tr><td colspan="18" style="text-align:center; color:var(--text-muted);">Memuat data iuran warga...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bayar Kas Section -->
+            <section id="bayar-kas" class="page-section">
+                <div class="bayar-kas-container">
+                    <div class="section-header">
+                        <h2>Pembayaran Kas Gang, dll. (QRIS / Rekening)</h2>
+                    </div>
+                    
+                    <div class="bayar-kas-content">
+                        <!-- QRIS Section -->
+                        <div class="bayar-kas-qris">
+                            <div class="bayar-kas-warning">
+                                <i class="fa-solid fa-circle-info"></i>
+                                <strong>Penting:</strong> Pastikan Anda telah melakukan pembayaran melalui QRIS dibawah atau melalui Rek. Mandiri 1260010381001
+an.Riswanda Pujiyarto sebelum mengisi form konfirmasi di bawah.
+                            </div>
+                            <div class="bayar-kas-qris-wrapper">
+                                <img src="qris.png" alt="QRIS Payment Code" class="bayar-kas-qris-image">
+                            </div>
+                        </div>
+                        
+                        <!-- Form Section -->
+                        <div class="bayar-kas-form">
+                            <h3>Konfirmasi Pembayaran</h3>
+                            
+                            <form id="paymentConfirmForm">
+                                <div class="form-group">
+                                    <label for="paymentName">Nama Lengkap <span>*</span></label>
+                                    <input type="text" id="paymentName" name="nama" placeholder="Masukkan nama lengkap" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="paymentHouse">No. Rumah <span>*</span></label>
+                                    <input type="text" id="paymentHouse" name="no_rumah" placeholder="Contoh: E20/01" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="paymentDesc">Keterangan <span>*</span></label>
+                                    <textarea id="paymentDesc" name="keterangan" placeholder="Contoh: Pembayaran Kas Gang Bulan Mei 2026" rows="3" required></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="paymentProof">Upload Bukti Bayar <span>*</span></label>
+                                    <input type="file" id="paymentProof" name="bukti_bayar" accept="image/*,.pdf" required>
+                                    <small>Format: Foto atau PDF (max 5MB)</small>
+                                </div>
+
+                                <button type="submit" class="btn-submit">
+                                    <i class="fa-solid fa-paper-plane"></i> Kirim ke WhatsApp Admin
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Galeri Section -->
+            <section id="galeri" class="page-section">
+                <div class="galeri-container">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-images" style="color:var(--primary-color)"></i> Galeri Kegiatan Warga</h2>
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <button id="btnUploadFoto" class="btn-submit admin-only" style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;font-size:14px;margin-top:0;width:auto;height:38px;">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Foto
+                            </button>
+                          <!--  <button id="btnSyncGaleri" class="btn-submit admin-only" style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;font-size:14px;margin-top:0;background-color:#7c3aed;width:auto;height:38px;" title="Pulihkan metadata galeri dari R2 jika tabel D1 terhapus">
+                                <i class="fa-solid fa-rotate"></i> Pulihkan dari R2 -->
+                            </button> 
+
+                           <!-- <button id="galeri-container" class="btn-submit" style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;font-size:14px;margin-top:0;background-color:#7c3aed;width:auto;height:38px;" title="Pulihkan metadata galeri dari R2 jika tabel D1 terhapus">
+                                <i class="fa-solid fa-rotate"></i> Refresh  -->
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Tag -->
+                    <div class="galeri-filter-bar">
+                        <button class="galeri-tag-btn active" data-tag="">Semua</button>
+                        <div id="galeriTagFilters"></div>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="galeri-search-bar">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="galeriSearchInput" placeholder="Cari judul atau keterangan...">
+                    </div>
+
+                    <!-- Grid -->
+                    <div id="galeriGrid" class="galeri-grid">
+                        <div class="galeri-loading">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> Memuat galeri...
+                        </div>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div id="galeriEmpty" class="galeri-empty" style="display:none;">
+                        <i class="fa-solid fa-photo-film"></i>
+                        <p>Belum ada foto di galeri</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Inventaris Section -->
+            <section id="inventaris" class="page-section">
+                <div class="inventaris-container">
+                    <div class="section-header">
+                        <h2>Data Inventaris Gang E20/E21</h2>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button id="btnTambahInventaris" class="btn-submit admin-only" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px; font-size: 14px; margin-top: 0; background-color: var(--primary-color); width: auto; height: 38px;"><i class="fa-solid fa-plus-circle"></i> Tambah Data</button>
+                            <button id="btnExportInventarisPDF" class="btn-submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px; font-size: 14px; margin-top: 0; background-color: var(--primary-color); width: auto; height: 38px;">
+                                <i class="fa-solid fa-file-pdf"></i> Export PDF
+                            </button>
+                            <button id="btnExportInventarisExcel" class="btn-submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px; font-size: 14px; margin-top: 0; background-color: var(--primary-color); width: auto; height: 38px;">
+                                <i class="fa-solid fa-file-export"></i> Export Excel
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table id="inventarisTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Barang</th>
+                                    <th>Kategori</th>
+                                    <th>Jumlah</th>
+                                    <th>Kondisi</th>
+                                    <th>Lokasi</th>
+                                    <th>Keterangan</th>
+                                    <th class="admin-only">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventarisTableBody">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Program Kerja Section -->
+            <section id="program" class="page-section">
+                <div class="program-container">
+                    <div class="section-header">
+                        <h2>Program Kerja Gang E20/E21 Tahun 2026</h2>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button id="btnTambahProgram" class="btn-submit admin-only" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px; font-size: 14px; margin-top: 0; background-color: var(--primary-color); width: auto; height: 38px;"><i class="fa-solid fa-plus-circle"></i> Tambah Data</button>
+                            <button id="btnExportProgramPDF" class="btn-submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px; font-size: 14px; margin-top: 0; background-color: var(--primary-color); width: auto; height: 38px;">
+                                <i class="fa-solid fa-file-pdf"></i> Export PDF
+                            </button>
+                            <button id="btnExportProgramExcel" class="btn-submit" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 12px; font-size: 14px; margin-top: 0; background-color: var(--primary-color); width: auto; height: 38px;">
+                                <i class="fa-solid fa-file-export"></i> Export Excel
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table id="programTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Program Kerja</th>
+                                    <th>PIC</th>
+                                    <th>Target Waktu</th>
+                                    <th>Status</th>
+                                    <th>Keterangan</th>
+                                    <th class="admin-only">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="programTableBody">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Struktur Organisasi Section -->
+            <section id="struktur" class="page-section">
+                <div class="struktur-container">
+                    <div class="section-header" style="text-align: center; justify-content: center; margin-bottom: 32px;">
+                        <h2>Struktur Kepengurusan Gang</h2>
+                    </div>
+                    
+                    <div class="org-tree">
+                        <!-- Level 1: Ketua -->
+                        <div class="org-level">
+                            <div class="org-card leader">
+                                <div class="org-avatar"><i class="fa-solid fa-user-tie"></i></div>
+                                <h4>Firmansyah</h4>
+                                <p>Ketua RT</p>
+                            </div>
+                        </div>
+
+                        <div class="org-level">
+                            <div class="org-card leader">
+                                <div class="org-avatar"><i class="fa-solid fa-circle-user"></i></div>
+                                <h4>Riswanda Pujiyarto</h4>
+                                <p>Ketua Gang</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Level 2: Sekretaris & Bendahara -->
+                        <div class="org-level">
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-calculator"></i></div>
+                                <h4>Dwi Purwanto</h4>
+                                <p>Bendahara</p>
+                            </div>
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-calculator"></i></div>
+                                <h4>Prayogo Reggi </h4>
+                                <p>Bendahara</p>
+                            </div>
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-calculator"></i></div>
+                                <h4>Syaifulloh</h4>
+                                <p>Bendahara</p>
+                            </div>
+                            
+                        </div>
+
+                        <!-- Level 3: Seksi-seksi -->
+                        <div class="org-level members">
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-shield-halved"></i></div>
+                                <h4>Nama Seksi</h4>
+                                <p>Seksi Keamanan</p>
+                            </div>
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-broom"></i></div>
+                                <h4>Nama Seksi</h4>
+                                <p>Seksi Kebersihan</p>
+                            </div>
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                                <h4>Nama Seksi</h4>
+                                <p>Seksi Sosial</p>
+                            </div>
+                            <div class="org-card">
+                                <div class="org-avatar"><i class="fa-solid fa-lightbulb"></i></div>
+                                <h4>Nama Seksi</h4>
+                                <p>Seksi Pembangunan</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Kritik & Saran Section -->
+            <section id="saran" class="page-section">
+                <div class="saran-container">
+                    <!-- Form untuk semua warga -->
+                    <div class="saran-form-wrapper">
+                        <div class="bayar-kas-form saran-form">
+                            <h3><i class="fa-solid fa-comments text-primary"></i> Kritik, Saran & Pengaduan</h3>
+                            <p class="saran-subtitle">Salurkan aspirasi, kritik, saran, atau pengaduan Anda demi kemajuan Gang E20/E21.</p>
+                            
+                            <form id="saranForm">
+                                <div class="saran-form-grid">
+                                    <div class="form-group">
+                                        <label for="saranNama">Nama Pelapor</label>
+                                        <input type="text" id="saranNama" name="nama" placeholder="Kosongkan jika Anonim">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="saranAlamat">Alamat Rumah</label>
+                                        <input type="text" id="saranAlamat" name="alamat" placeholder="Kosongkan jika Rahasia">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="saranTanggal">Tanggal Kejadian / Laporan <span>*</span></label>
+                                    <input type="date" id="saranTanggal" name="tanggal" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="saranDetail">Detail Kejadian / Layanan / Kritik & Saran <span>*</span></label>
+                                    <textarea id="saranDetail" name="detail" placeholder="Tuliskan laporan, kritik, saran, atau pengaduan secara lengkap dan jelas..." rows="5" required></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="saranFoto">Upload Foto Bukti/Pendukung (Opsional)</label>
+                                    <input type="file" id="saranFoto" name="foto" accept="image/*">
+                                    <small>Format: Gambar (JPG/PNG), max 5MB</small>
+                                </div>
+
+                                <button type="submit" id="btnSaranSubmit" class="btn-submit saran-submit-btn">
+                                    <span class="btn-saran-text"><i class="fa-solid fa-paper-plane"></i> Kirim </span>
+                                    <i class="fa-solid fa-spinner fa-spin btn-saran-loading" style="display: none;"></i>
+                                </button>
+                            </form>
+                            <div id="saranFormMessage" class="message-box" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Panel admin: hanya tampil setelah login -->
+                    <div id="saranAdminPanel" class="saran-admin-panel admin-only">
+                        <div class="section-header">
+                            <h2><i class="fa-solid fa-folder-open text-primary"></i> Daftar Laporan Masuk</h2>
+                            <div class="saran-admin-actions">
+                                <button id="btnRefreshSaran" class="btn-submit saran-action-btn" title="Refresh data">
+                                    <i class="fa-solid fa-rotate-right"></i> Refresh
+                                </button>
+                                <button id="btnExportSaranPDF" class="btn-submit saran-action-btn">
+                                    <i class="fa-solid fa-file-pdf"></i> Export PDF
+                                </button>
+                            </div>
+                        </div>
+
+                <div class="table-container saran-table-container">
+                             <table id="saranTable" class="saran-table">
+                                 <thead>
+                                     <tr>
+                                         <th>No</th>
+                                         <th>Tanggal</th>
+                                         <th>Pengirim</th>
+                                         <th>Alamat</th>
+                                         <th>Detail</th>
+                                         <th>Waktu Masuk</th>
+                                         <th>Lampiran</th>
+                                         <th class="admin-only">Aksi</th>
+                                     </tr>
+                                 </thead>
+                                 <tbody id="saranTableBody">
+                                     <tr>
+                                         <td colspan="8" class="saran-empty">Memuat data kritik dan saran...</td>
+                                     </tr>
+                                 </tbody>
+                             </table>
+                         </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">Data berhasil disimpan!</div>
+
+    <!-- PDF Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; display: flex; flex-direction: column;">
+            <span class="close-modal" onclick="closePDFPreview()">&times;</span>
+            <div style="flex: 1; overflow-y: auto; padding: 30px; background-color: white; border-radius: 12px;">
+                <div id="previewContent"></div>
+            </div>
+            <div style="padding: 20px; border-top: 1px solid var(--border-color); display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn-text" onclick="closePDFPreview()" style="padding: 10px 20px; border: 1px solid var(--border-color); border-radius: 6px;">Batal</button>
+                <button class="btn-submit" onclick="downloadPDFNow()" style="padding: 10px 20px;">Download PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content form-container">
+            <span class="close-modal">&times;</span>
+            <h2 style="text-align: center;">Login</h2>
+            <p style="margin-bottom: 24px; color: var(--text-muted); font-size: 14px;">Silakan login untuk mengakses menu admin.</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn-submit" id="btnLoginSubmit">
+                    <span class="btn-login-text">Login</span>
+                    <i class="fa-solid fa-spinner fa-spin btn-login-loading" style="display: none;"></i>
+                </button>
+            </form>
+            <div id="loginMessage" class="message-box" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Modal Edit/Tambah Warga (Iuran) -->
+    <div id="wargaModal" class="modal">
+        <div class="modal-content form-container" style="max-width: 600px;">
+            <span class="close-modal" id="closeWargaModal">&times;</span>
+            <h2 id="wargaModalTitle">Data Warga</h2>
+            <form id="wargaForm">
+                <input type="hidden" id="originalRumah" name="originalRumah">
+                <div class="form-group">
+                    <label for="wargaRumah">Nomor Rumah <span>*</span></label>
+                    <input type="text" id="wargaRumah" name="Rumah" placeholder="Contoh: E20/01" required>
+                </div>
+                <div class="form-group">
+                    <label for="wargaNama">Nama Kepala Keluarga <span>*</span></label>
+                    <input type="text" id="wargaNama" name="Nama" placeholder="Nama warga" required>
+                </div>
+                
+                <h3 style="margin: 20px 0 10px 0; font-size: 16px;">Checklist Pembayaran Bulanan (Jan - Des)</h3>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+                    <div>
+                        <input type="checkbox" id="checkJan" name="Jan" value="Y">
+                        <label for="checkJan">Jan</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="checkFeb" name="Feb" value="Y">
+                        <label for="checkFeb">Feb</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="checkMar" name="Mar" value="Y">
+                        <label for="checkMar">Mar</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="checkApr" name="Apr" value="Y">
+                        <label for="checkApr">Apr</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="checkMei" name="Mei" value="Y">
+                        <label for="checkMei">Mei</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="checkJuni" name="Juni" value="Y">
+                        <label for="checkJuni">Juni</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="checkJuli" name="Juli" value="Y">
+                        <label for="checkJuli">Juli</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="checkAgu" name="Agu" value="Y">
+                        <label for="checkAgu">Agu</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="checkSep" name="Sep" value="Y">
+                        <label for="checkSep">Sep</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="checkOkt" name="Okt" value="Y">
+                        <label for="checkOkt">Okt</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="checkNov" name="Nov" value="Y">
+                        <label for="checkNov">Nov</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="checkDes" name="Des" value="Y">
+                        <label for="checkDes">Des</label>
+                    </div>
+                </div>
+                
+                <h3 style="margin: 20px 0 10px 0; font-size: 16px;">Nominal (Rp)</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label for="wargaHutRI">HUT RI</label>
+                        <input type="number" id="wargaHutRI" name="HutRI" value="0" min="0" step="1000" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:6px;">
+                    </div>
+                    <div class="form-group">
+                        <label for="wargaThrSecurity">THR Security</label>
+                        <input type="number" id="wargaThrSecurity" name="ThrSecurity" value="0" min="0" step="1000" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:6px;">
+                    </div>
+                    <div class="form-group">
+                        <label for="wargaPartisipasiRonda">Partisipasi Ronda</label>
+                        <input type="number" id="wargaPartisipasiRonda" name="PartisipasiRonda" value="0" min="0" step="1000" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:6px;">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-submit" id="btnWargaSubmit">
+                    <span>Simpan Data</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit/Tambah Inventaris -->
+    <div id="inventarisModal" class="modal">
+        <div class="modal-content form-container" style="max-width: 500px;">
+            <span class="close-modal" id="closeInventarisModal">&times;</span>
+            <h2 id="inventarisModalTitle">Data Inventaris</h2>
+            <form id="inventarisForm">
+                <div class="form-group">
+                    <label for="invNo">Nomor/Urutan <span>*</span></label>
+                    <input type="number" id="invNo" name="no" required>
+                </div>
+                <div class="form-group">
+                    <label for="invNama">Nama Barang <span>*</span></label>
+                    <input type="text" id="invNama" name="nama" required>
+                </div>
+                <div class="form-group">
+                    <label for="invKategori">Kategori <span>*</span></label>
+                    <input type="text" id="invKategori" name="kategori" placeholder="Contoh: Penerangan, Fasilitas" required>
+                </div>
+                <div class="form-group">
+                    <label for="invJumlah">Jumlah <span>*</span></label>
+                    <input type="number" id="invJumlah" name="jumlah" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="invKondisi">Kondisi <span>*</span></label>
+                    <select id="invKondisi" name="kondisi" required>
+                        <option value="Baik">Baik</option>
+                        <option value="Cukup">Cukup</option>
+                        <option value="Rusak">Rusak</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="invLokasi">Lokasi <span>*</span></label>
+                    <input type="text" id="invLokasi" name="lokasi" required>
+                </div>
+                <div class="form-group">
+                    <label for="invKeterangan">Keterangan</label>
+                    <input type="text" id="invKeterangan" name="keterangan">
+                </div>
+                <button type="submit" class="btn-submit" id="btnInventarisSubmit">
+                    <span>Simpan Barang</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit/Tambah Program Kerja -->
+    <div id="programModal" class="modal">
+        <div class="modal-content form-container" style="max-width: 500px;">
+            <span class="close-modal" id="closeProgramModal">&times;</span>
+            <h2 id="programModalTitle">Data Program Kerja</h2>
+            <form id="programForm">
+                <div class="form-group">
+                    <label for="progNo">Nomor/Urutan <span>*</span></label>
+                    <input type="number" id="progNo" name="no" required>
+                </div>
+                <div class="form-group">
+                    <label for="progProgram">Nama Program Kerja <span>*</span></label>
+                    <input type="text" id="progProgram" name="program" required>
+                </div>
+                <div class="form-group">
+                    <label for="progPic">PIC / Penanggung Jawab <span>*</span></label>
+                    <input type="text" id="progPic" name="pic" required>
+                </div>
+                <div class="form-group">
+                    <label for="progTarget">Target Waktu <span>*</span></label>
+                    <input type="text" id="progTarget" name="target" placeholder="Contoh: Maret 2026" required>
+                </div>
+                <div class="form-group">
+                    <label for="progStatus">Status <span>*</span></label>
+                    <select id="progStatus" name="status" required>
+                        <option value="Belum Mulai">Belum Mulai</option>
+                        <option value="Dalam Proses">Dalam Proses</option>
+                        <option value="Selesai">Selesai</option>
+                        <option value="Berkelanjutan">Berkelanjutan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="progKeterangan">Keterangan</label>
+                    <input type="text" id="progKeterangan" name="keterangan">
+                </div>
+                <button type="submit" class="btn-submit" id="btnProgramSubmit">
+                    <span>Simpan Program</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Upload Foto Galeri -->
+    <div id="galeriUploadModal" class="modal">
+        <div class="modal-content form-container" style="max-width:520px;">
+            <span class="close-modal" id="closeGaleriUploadModal">&times;</span>
+            <h2>Upload Foto Kegiatan</h2>
+            <p style="color:var(--text-muted);font-size:14px;margin-bottom:20px;">Unggah foto kegiatan warga Gang E20/E21</p>
+            <form id="galeriUploadForm">
+                <div class="form-group">
+                    <label for="galeriJudul">Judul Foto <span style="color:red">*</span></label>
+                    <input type="text" id="galeriJudul" placeholder="Contoh: Kerja Bakti RT" required>
+                </div>
+                <div class="form-group">
+                    <label for="galeriTag">Tag / Kategori</label>
+                    <input type="text" id="galeriTag" placeholder="Contoh: Kerja Bakti, Rapat, HUT RI">
+                    <small style="color:var(--text-muted);">Pisahkan dengan koma untuk beberapa tag</small>
+                </div>
+                <div class="form-group">
+                    <label for="galeriKeterangan">Keterangan</label>
+                    <textarea id="galeriKeterangan" rows="3" placeholder="Deskripsi singkat kegiatan..." style="width:100%;padding:12px 16px;border:1px solid var(--border-color);border-radius:8px;font-size:14px;resize:vertical;outline:none;font-family:inherit;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="galeriFotoInput">Pilih Foto <span style="color:red">*</span></label>
+                    <div class="galeri-drop-zone" id="galeriDropZone">
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size:32px;color:var(--primary-color);margin-bottom:8px;"></i>
+                        <p>Drag &amp; drop foto di sini, atau</p>
+                        <label for="galeriFotoInput" class="btn-submit" style="width:auto;padding:8px 20px;font-size:13px;cursor:pointer;display:inline-flex;margin-top:8px;">
+                            <i class="fa-solid fa-folder-open"></i>&nbsp; Pilih File
+                        </label>
+                        <input type="file" id="galeriFotoInput" accept="image/*" style="display:none;">
+                        <p id="galeriFileInfo" style="margin-top:8px;font-size:13px;color:var(--text-muted);"></p>
+                    </div>
+                    <div id="galeriPreviewBox" style="display:none;margin-top:12px;text-align:center;">
+                        <img id="galeriPreviewImg" style="max-width:100%;max-height:200px;border-radius:8px;object-fit:cover;border:1px solid var(--border-color);">
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit" id="btnGaleriSubmit" style="margin-top:4px;">
+                    <span id="galeriSubmitText"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Foto</span>
+                    <i class="fa-solid fa-spinner fa-spin" id="galeriSubmitLoading" style="display:none;"></i>
+                </button>
+            </form>
+            <div id="galeriUploadMsg" class="message-box" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- Lightbox Galeri -->
+    <div id="galeriLightbox" class="galeri-lightbox">
+        <button class="lightbox-close" id="lightboxClose"><i class="fa-solid fa-xmark"></i></button>
+        <button class="lightbox-nav lightbox-prev" id="lightboxPrev"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="lightbox-nav lightbox-next" id="lightboxNext"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="lightbox-content">
+            <div class="lightbox-img-wrap">
+                <img id="lightboxImg" src="" alt="">
+            </div>
+            <div class="lightbox-info">
+                <h3 id="lightboxJudul"></h3>
+                <p id="lightboxKeterangan"></p>
+                <div id="lightboxTags"></div>
+                <small id="lightboxTimestamp" style="color:rgba(255,255,255,0.5);"></small>
+                <button id="lightboxDelete" class="lightbox-delete-btn admin-only">
+                    <i class="fa-solid fa-trash"></i> Hapus Foto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content form-container" style="max-width: 400px; text-align: center;">
+            <span class="close-modal" onclick="closeDeleteConfirm()">&times;</span>
+            <div style="font-size: 40px; margin-bottom: 16px;">🗑️</div>
+            <h2 style="margin-bottom: 12px;">Hapus Data</h2>
+            <p id="deleteConfirmMessage" style="margin-bottom: 24px; color: var(--text-muted);">Apakah Anda yakin ingin menghapus data ini?</p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn-text" onclick="closeDeleteConfirm()" style="padding: 10px 24px; border: 1px solid var(--border-color); border-radius: 6px;">Batal</button>
+                <button class="btn-submit" id="btnConfirmDelete" style="padding: 10px 24px; background-color: var(--danger-color);">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tambah/Edit Data Warga -->
+    <div id="wargaDataModal" class="modal">
+        <div class="modal-content form-container" style="max-width:560px;">
+            <span class="close-modal" id="closeWargaDataModal">&times;</span>
+            <h2 id="wargaDataModalTitle">Tambah Data Warga</h2>
+            <p style="color:var(--text-muted);font-size:14px;margin-bottom:20px;">Lengkapi data warga Gang E20/E21</p>
+
+            <form id="wargaDataForm">
+                <input type="hidden" id="wargaDataId">
+
+                <div class="form-group">
+                    <label for="wargaDataRumah">Nomor Rumah <span style="color:red">*</span></label>
+                    <input type="text" id="wargaDataRumah" placeholder="Contoh: E20/01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="wargaDataNama">Nama Kepala Keluarga <span style="color:red">*</span></label>
+                    <input type="text" id="wargaDataNama" placeholder="Masukkan nama lengkap" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="wargaDataTelp">No Telp / WA</label>
+                    <input type="tel" id="wargaDataTelp" placeholder="Contoh: 08123456789">
+                </div>
+
+                <div class="form-group">
+                    <label for="wargaDataAnggota">Jumlah Anggota Keluarga</label>
+                    <input type="number" id="wargaDataAnggota" min="1" max="20" value="1" placeholder="Contoh: 4">
+                </div>
+
+                <div class="form-group">
+                    <label for="wargaDataKK">Upload File KK (PDF / JPG / PNG, maks 2MB)</label>
+                    <input type="file" id="wargaDataKK" accept=".pdf,.jpg,.jpeg,.png">
+                    <small id="wargaDataKKInfo" style="color:var(--text-muted);margin-top:4px;display:block;"></small>
+                </div>
+
+                <button type="submit" class="btn-submit" id="btnWargaDataSubmit" style="margin-top:8px;">
+                    <span id="wargaDataBtnText"><i class="fa-solid fa-floppy-disk"></i> Simpan Data</span>
+                    <i class="fa-solid fa-spinner fa-spin" id="wargaDataBtnLoading" style="display:none;"></i>
+                </button>
+            </form>
+            <div id="wargaDataFormMessage" class="message-box" style="display:none;"></div>
+        </div>
+    </div>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>

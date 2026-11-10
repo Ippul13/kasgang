@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Visibility Toggle</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .test-container { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .test-header { font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .test-result { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .test-result.pass { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .test-result.fail { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .test-result.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; background: #007bff; color: white; }
+        button:hover { background: #0056b3; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f5f5f5; }
+        .admin-only { display: none; }
+        .admin-only.show { display: table-cell !important; }
+        table .admin-only { display: none; }
+        table .admin-only.show { display: table-cell !important; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Admin Visibility Toggle</h1>
+    
+    <div class="test-container">
+        <div class="test-header">Test 1: CSS Visibility Rules</div>
+        <button onclick="testCSSRules()">Run Test</button>
+        <div id="testCSSResult"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-header">Test 2: HTML Structure</div>
+        <button onclick="testHTMLStructure()">Run Test</button>
+        <div id="testHTMLResult"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-header">Test 3: Visibility Toggle Simulation</div>
+        <button onclick="testToggleLogic()">Run Test</button>
+        <div id="testToggleResult"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-header">Test 4: Demo Table with Action Buttons</div>
+        <button onclick="toggleAdminMode()">Toggle Admin Mode</button>
+        <span id="adminStatus" style="margin-left: 10px; font-weight: bold;">Status: Logged Out</span>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Name</th>
+                    <th class="admin-only">Aksi (Action Column)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Item 1</td>
+                    <td class="admin-only">
+                        <button onclick="alert('Edit Item 1')">Edit 🖊️</button>
+                        <button onclick="alert('Delete Item 1')">Delete 🗑️</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Item 2</td>
+                    <td class="admin-only">
+                        <button onclick="alert('Edit Item 2')">Edit 🖊️</button>
+                        <button onclick="alert('Delete Item 2')">Delete 🗑️</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Item 3</td>
+                    <td class="admin-only">
+                        <button onclick="alert('Edit Item 3')">Edit 🖊️</button>
+                        <button onclick="alert('Delete Item 3')">Delete 🗑️</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let isAdminMode = false;
+
+        function testCSSRules() {
+            const result = document.getElementById('testCSSResult');
+            result.innerHTML = '';
+            
+            const checks = [];
+            
+            // Create test element
+            const testEl = document.createElement('div');
+            testEl.className = 'admin-only';
+            testEl.style.display = 'block'; // Try to force it
+            document.body.appendChild(testEl);
+            
+            const computedStyle = window.getComputedStyle(testEl);
+            checks.push({
+                name: '.admin-only has display: none by default',
+                pass: computedStyle.display === 'none'
+            });
+            
+            // Test .show class
+            testEl.classList.add('show');
+            const computedStyle2 = window.getComputedStyle(testEl);
+            checks.push({
+                name: '.admin-only.show has display: table-cell',
+                pass: computedStyle2.display === 'table-cell'
+            });
+            
+            document.body.removeChild(testEl);
+            
+            checks.forEach(check => {
+                const div = document.createElement('div');
+                div.className = `test-result ${check.pass ? 'pass' : 'fail'}`;
+                div.textContent = (check.pass ? '✅' : '❌') + ' ' + check.name;
+                result.appendChild(div);
+            });
+        }
+
+        function testHTMLStructure() {
+            const result = document.getElementById('testHTMLResult');
+            result.innerHTML = '';
+            
+            const adminOnlyElements = document.querySelectorAll('.admin-only');
+            
+            const div = document.createElement('div');
+            div.className = `test-result ${adminOnlyElements.length > 0 ? 'pass' : 'fail'}`;
+            div.innerHTML = `✅ Found ${adminOnlyElements.length} admin-only elements in page<br>` +
+                           `(Table headers: ${document.querySelectorAll('th.admin-only').length}, ` +
+                           `Table cells: ${document.querySelectorAll('td.admin-only').length})`;
+            result.appendChild(div);
+        }
+
+        function testToggleLogic() {
+            const result = document.getElementById('testToggleResult');
+            result.innerHTML = '';
+            
+            // Simulate login
+            const adminElements = document.querySelectorAll('.admin-only');
+            const initialCount = adminElements.length;
+            
+            // Simulate updateAuthButton() with .show class
+            adminElements.forEach(el => el.classList.add('show'));
+            
+            let visibleCount = 0;
+            adminElements.forEach(el => {
+                if (el.classList.contains('show')) visibleCount++;
+            });
+            
+            const div1 = document.createElement('div');
+            div1.className = 'test-result pass';
+            div1.textContent = `✅ Initial admin elements: ${initialCount}`;
+            result.appendChild(div1);
+            
+            const div2 = document.createElement('div');
+            div2.className = 'test-result pass';
+            div2.textContent = `✅ After adding .show class: ${visibleCount} elements have .show`;
+            result.appendChild(div2);
+            
+            // Simulate logout
+            adminElements.forEach(el => el.classList.remove('show'));
+            
+            visibleCount = 0;
+            adminElements.forEach(el => {
+                if (el.classList.contains('show')) visibleCount++;
+            });
+            
+            const div3 = document.createElement('div');
+            div3.className = 'test-result pass';
+            div3.textContent = `✅ After removing .show class: ${visibleCount} elements with .show (should be 0)`;
+            result.appendChild(div3);
+        }
+
+        function toggleAdminMode() {
+            isAdminMode = !isAdminMode;
+            const adminElements = document.querySelectorAll('.admin-only');
+            const status = document.getElementById('adminStatus');
+            
+            if (isAdminMode) {
+                adminElements.forEach(el => el.classList.add('show'));
+                status.textContent = 'Status: Logged In (Admin Mode ✅)';
+                status.style.color = 'green';
+            } else {
+                adminElements.forEach(el => el.classList.remove('show'));
+                status.textContent = 'Status: Logged Out';
+                status.style.color = 'red';
+            }
+        }
+
+        // Run all tests on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded. Click buttons to run tests.');
+        });
+    </script>
+</body>
+</html>
